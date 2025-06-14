@@ -8,6 +8,15 @@ import (
 
 	"github.com/kumarlokesh/sysd/exercises/kafka-transactional-messaging/internal/common"
 	"github.com/kumarlokesh/sysd/exercises/kafka-transactional-messaging/internal/coordinator"
+	"slices"
+)
+
+// Package-level error variables
+var (
+	ErrTransactionInProgress = errors.New("transaction already in progress")
+	ErrNoActiveTransaction   = errors.New("no active transaction")
+	ErrMessageLogFailure     = errors.New("failed to append to message log")
+	ErrPartitionAddFailed    = errors.New("failed to add partition to transaction")
 )
 
 // Producer represents a transactional message producer
@@ -34,7 +43,7 @@ func (p *Producer) BeginTransaction(timeout time.Duration) error {
 	defer p.currentTxMux.Unlock()
 
 	if p.currentTx != nil {
-		return errors.New("transaction already in progress")
+		return ErrTransactionInProgress
 	}
 
 	tx, err := p.coordinator.BeginTransaction(p.producerID, timeout)
@@ -52,23 +61,17 @@ func (p *Producer) Send(topic common.Topic, partition common.Partition, key, val
 	defer p.currentTxMux.Unlock()
 
 	if p.currentTx == nil {
-		return 0, errors.New("no transaction in progress")
+		return 0, ErrNoActiveTransaction
 	}
 
 	// Add partition to transaction if not already added
 	tp := common.TopicPartition{Topic: topic, Partition: partition}
-	found := false
-	for _, p := range p.currentTx.Partitions {
-		if p == tp {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(p.currentTx.Partitions, tp)
 
 	if !found {
 		_, err := p.coordinator.AddPartitionsToTransaction(p.currentTx.ID, []common.TopicPartition{tp})
 		if err != nil {
-			return 0, fmt.Errorf("failed to add partition to transaction: %w", err)
+			return 0, fmt.Errorf("%w: %w", ErrPartitionAddFailed, err)
 		}
 	}
 
@@ -83,7 +86,7 @@ func (p *Producer) Send(topic common.Topic, partition common.Partition, key, val
 
 	offset, err := p.messageLog.Append(topic, partition, msg, p.currentTx.ID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to append message to log: %w", err)
+		return 0, fmt.Errorf("%w: %w", ErrMessageLogFailure, err)
 	}
 
 	return offset, nil
