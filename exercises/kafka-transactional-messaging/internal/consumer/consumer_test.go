@@ -51,21 +51,20 @@ func TestConsumer_FiltersAbortedTransactions(t *testing.T) {
 	// Subscribe to a topic
 	_ = consumer.Subscribe("test-topic", 0)
 
-
 	// Add messages from an aborted transaction
 	topic := common.Topic("test-topic")
 	partition := common.Partition(0)
 	txID := common.TransactionID("tx-aborted")
 
-	_, _ = messageLog.Append(topic, partition, 
-		&common.Message{Key: []byte("key1"), Value: []byte("aborted1"), Topic: topic, Partition: partition}, 
+	_, _ = messageLog.Append(topic, partition,
+		&common.Message{Key: []byte("key1"), Value: []byte("aborted1"), Topic: topic, Partition: partition},
 		txID)
 	_ = messageLog.AddTransactionMarker(topic, partition, txID, common.TransactionStateAborted)
 
 	// Add messages from a committed transaction
 	txID2 := common.TransactionID("tx-committed")
-	_, _ = messageLog.Append(topic, partition, 
-		&common.Message{Key: []byte("key2"), Value: []byte("committed1"), Topic: topic, Partition: partition}, 
+	_, _ = messageLog.Append(topic, partition,
+		&common.Message{Key: []byte("key2"), Value: []byte("committed1"), Topic: topic, Partition: partition},
 		txID2)
 	_ = messageLog.AddTransactionMarker(topic, partition, txID2, common.TransactionStateCommitted)
 
@@ -87,13 +86,13 @@ func TestConsumer_SeeksToOffset(t *testing.T) {
 
 	// Add 3 messages
 	for i := 0; i < 3; i++ {
-		_, _ = messageLog.Append(topic, partition, 
+		_, _ = messageLog.Append(topic, partition,
 			&common.Message{
-				Key:       []byte("key"), 
+				Key:       []byte("key"),
 				Value:     []byte{byte('0' + i)},
-				Topic:     topic, 
+				Topic:     topic,
 				Partition: partition,
-			}, 
+			},
 			txID)
 	}
 	_ = messageLog.AddTransactionMarker(topic, partition, txID, common.TransactionStateCommitted)

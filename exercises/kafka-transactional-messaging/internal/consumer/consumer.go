@@ -10,10 +10,10 @@ import (
 
 // Consumer represents a transactional message consumer
 type Consumer struct {
-	groupID     string
-	messageLog  *common.MessageLog
-	offsets     map[common.TopicPartition]common.Offset
-	offsetsMux  sync.RWMutex
+	groupID    string
+	messageLog *common.MessageLog
+	offsets    map[common.TopicPartition]common.Offset
+	offsetsMux sync.RWMutex
 }
 
 // NewConsumer creates a new transactional consumer

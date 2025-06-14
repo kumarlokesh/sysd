@@ -8,12 +8,12 @@ import (
 
 // MessageLogEntry represents an entry in the message log
 type MessageLogEntry struct {
-	Message     *Message
-	TxID        TransactionID
-	TxState     TransactionState
-	Timestamp   time.Time
-	Offset      Offset
-	IsMarker    bool
+	Message   *Message
+	TxID      TransactionID
+	TxState   TransactionState
+	Timestamp time.Time
+	Offset    Offset
+	IsMarker  bool
 }
 
 // MessageLog represents an in-memory message log

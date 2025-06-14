@@ -19,7 +19,7 @@ var (
 // Coordinator manages the lifecycle of transactions
 type Coordinator struct {
 	transactions map[common.TransactionID]*common.Transaction
-	mu          sync.RWMutex
+	mu           sync.RWMutex
 }
 
 // NewCoordinator creates a new transaction coordinator
@@ -73,7 +73,7 @@ func (c *Coordinator) PrepareTransaction(txID common.TransactionID) (*common.Tra
 	}
 
 	if tx.State != common.TransactionStateBegin {
-		return nil, fmt.Errorf("%w: cannot prepare transaction in state %s", 
+		return nil, fmt.Errorf("%w: cannot prepare transaction in state %s",
 			ErrInvalidTransactionState, tx.State)
 	}
 
@@ -92,7 +92,7 @@ func (c *Coordinator) CommitTransaction(txID common.TransactionID) (*common.Tran
 	}
 
 	if tx.State != common.TransactionStatePrepared {
-		return nil, fmt.Errorf("%w: cannot commit transaction in state %s", 
+		return nil, fmt.Errorf("%w: cannot commit transaction in state %s",
 			ErrInvalidTransactionState, tx.State)
 	}
 
@@ -136,9 +136,9 @@ func (c *Coordinator) CleanupExpiredTransactions() []common.TransactionID {
 	now := time.Now()
 
 	for id, tx := range c.transactions {
-		if tx.State != common.TransactionStateCommitted && 
-		   tx.State != common.TransactionStateAborted &&
-		   now.Sub(tx.StartTimestamp) > tx.Timeout {
+		if tx.State != common.TransactionStateCommitted &&
+			tx.State != common.TransactionStateAborted &&
+			now.Sub(tx.StartTimestamp) > tx.Timeout {
 			tx.UpdateState(common.TransactionStateAborted)
 			expired = append(expired, id)
 		}

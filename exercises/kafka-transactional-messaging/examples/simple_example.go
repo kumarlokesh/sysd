@@ -20,10 +20,8 @@ func main() {
 	// Create a producer
 	prod := producer.NewProducer("example-producer-1", coord, messageLog)
 
-
 	// Create a consumer group
 	consumer1 := consumer.NewConsumer("example-group-1", messageLog)
-
 
 	// Subscribe to a topic
 	topic := common.Topic("test-topic")

@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kumarlokesh/sysd/exercises/kafka-transactional-messaging/internal/coordinator"
 	"github.com/kumarlokesh/sysd/exercises/kafka-transactional-messaging/internal/common"
+	"github.com/kumarlokesh/sysd/exercises/kafka-transactional-messaging/internal/coordinator"
 	"github.com/stretchr/testify/assert"
 )
 

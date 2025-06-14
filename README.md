@@ -27,7 +27,7 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 ## Adding a New Exercise
 
 1. Create a new directory under `exercises/`
-2. Initialize a new Go module: `go mod init github.com/yourusername/sysd/exercises/exercise-name`
+2. Initialize a new Go module: `go mod init github.com/kumarlokesh/sysd/exercises/exercise-name`
 3. Follow the structure outlined above
 4. Add comprehensive tests
 5. Document your design in the README.md
