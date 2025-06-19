@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/kumarlokesh/sysd/exercises/ai-code-assistant/internal/types"
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
@@ -49,7 +50,7 @@ func (c *Chunker) WithSplitLargeFunctions(split bool) *Chunker {
 }
 
 // ChunkFile chunks a file into smaller pieces
-func (c *Chunker) ChunkFile(filePath string, content []byte, language string, tree *sitter.Tree) ([]Chunk, error) {
+func (c *Chunker) ChunkFile(filePath string, content []byte, language string, tree *sitter.Tree) ([]types.Chunk, error) {
 	// Get the base file name for chunk metadata
 	fileName := filepath.Base(filePath)
 
@@ -58,7 +59,7 @@ func (c *Chunker) ChunkFile(filePath string, content []byte, language string, tr
 	}
 
 	if language == "" {
-		return []Chunk{{
+		return []types.Chunk{{
 			ID:        generateChunkID(filePath, 0, 0, 0, 0),
 			Content:   string(content),
 			FilePath:  filePath,
@@ -72,40 +73,45 @@ func (c *Chunker) ChunkFile(filePath string, content []byte, language string, tr
 		}}, nil
 	}
 
-	rootNode := tree.RootNode()
+	// If we have a parse tree, use language-specific chunking
+	if tree != nil && language != "" {
+		var chunks []types.Chunk
+		switch strings.ToLower(language) {
+		case "go":
+			chunks = c.chunkGo(tree.RootNode(), content, filePath, language)
+		case "python":
+			chunks = c.chunkPython(tree.RootNode(), content, filePath, language)
+		case "javascript", "typescript":
+			chunks = c.chunkJavaScript(tree.RootNode(), content, filePath, language)
+		default:
+			chunks = c.chunkGeneric(tree.RootNode(), content, filePath, language)
+		}
 
-	var chunks []Chunk
-	switch strings.ToLower(language) {
-	case "go":
-		chunks = c.chunkGo(rootNode, content, filePath, language)
-	case "python":
-		chunks = c.chunkPython(rootNode, content, filePath, language)
-	case "javascript", "typescript":
-		chunks = c.chunkJavaScript(rootNode, content, filePath, language)
-	default:
-		chunks = c.chunkGeneric(rootNode, content, filePath, language)
+		// Process the chunks (merge small ones, split large ones)
+		return c.processChunks(chunks, content), nil
 	}
 
-	return c.processChunks(chunks, content), nil
+	return nil, nil
 }
 
-func (c *Chunker) processChunks(chunks []Chunk, content []byte) []Chunk {
-	var result []Chunk
+func (c *Chunker) processChunks(chunks []types.Chunk, content []byte) []types.Chunk {
+	var result []types.Chunk
 
 	for _, chunk := range chunks {
 		// If chunk is too small, try to merge with adjacent chunks
 		if len(chunk.Content) < c.minChunkSize && len(result) > 0 {
-			lastChunk := &result[len(result)-1]
-			if len(lastChunk.Content)+len(chunk.Content) <= c.maxChunkSize {
-				// Merge with previous chunk
-				lastChunk.Content = lastChunk.Content + "\n\n" + chunk.Content
+			// Merge with previous chunk if both are small
+			lastIdx := len(result) - 1
+			lastChunk := &result[lastIdx]
+			if len(lastChunk.Content) < c.minChunkSize {
+				lastChunk.Content += "\n" + chunk.Content
 				lastChunk.EndLine = chunk.EndLine
 				continue
 			}
 		}
 
 		// If chunk is too large, split it
-		if len(chunk.Content) > c.maxChunkSize && c.splitLargeFunctions {
+		if len(chunk.Content) > c.maxChunkSize {
 			splitChunks := c.splitLargeChunk(chunk, content)
 			result = append(result, splitChunks...)
 		} else {
@@ -117,15 +123,15 @@ func (c *Chunker) processChunks(chunks []Chunk, content []byte) []Chunk {
 }
 
 // splitLargeChunk splits a chunk that exceeds the maximum size
-func (c *Chunker) splitLargeChunk(chunk Chunk, content []byte) []Chunk {
+func (c *Chunker) splitLargeChunk(chunk types.Chunk, content []byte) []types.Chunk {
 	// For now, just split by lines and create new chunks
 	// A more sophisticated implementation might want to split at logical boundaries
 	lines := strings.Split(chunk.Content, "\n")
 	if len(lines) <= 1 {
-		return []Chunk{chunk}
+		return []types.Chunk{chunk}
 	}
 
-	var chunks []Chunk
+	var chunks []types.Chunk
 	var currentChunk strings.Builder
 	currentStartLine := chunk.StartLine
 	lineCount := 0
@@ -136,17 +142,17 @@ func (c *Chunker) splitLargeChunk(chunk Chunk, content []byte) []Chunk {
 
 		// If we've reached the max chunk size or this is the last line
 		if currentChunk.Len() >= c.maxChunkSize || i == len(lines)-1 {
-			chunks = append(chunks, Chunk{
+			chunks = append(chunks, types.Chunk{
 				ID:        generateChunkID(chunk.FilePath, currentStartLine, currentStartLine+lineCount-1, 0, uint32(len(chunks))),
 				Content:   currentChunk.String(),
 				FilePath:  chunk.FilePath,
 				Language:  chunk.Language,
+				NodeType:  chunk.NodeType,
 				StartLine: currentStartLine,
 				EndLine:   currentStartLine + lineCount - 1,
-				NodeType:  chunk.NodeType + "_part",
-				Metadata:  chunk.Metadata,
 			})
 
+			// Reset for next chunk
 			currentChunk.Reset()
 			currentStartLine += lineCount
 			lineCount = 0
@@ -159,8 +165,8 @@ func (c *Chunker) splitLargeChunk(chunk Chunk, content []byte) []Chunk {
 }
 
 // chunkGo extracts chunks from Go code
-func (c *Chunker) chunkGo(node *sitter.Node, content []byte, filePath, language string) []Chunk {
-	var chunks []Chunk
+func (c *Chunker) chunkGo(node *sitter.Node, content []byte, filePath, language string) []types.Chunk {
+	var chunks []types.Chunk
 
 	// Extract package declaration
 	if pkg := findFirstChildOfType(node, "package_clause"); pkg != nil {
@@ -225,8 +231,8 @@ func (c *Chunker) chunkGo(node *sitter.Node, content []byte, filePath, language 
 }
 
 // chunkPython extracts chunks from Python code
-func (c *Chunker) chunkPython(node *sitter.Node, content []byte, filePath, language string) []Chunk {
-	var chunks []Chunk
+func (c *Chunker) chunkPython(node *sitter.Node, content []byte, filePath, language string) []types.Chunk {
+	var chunks []types.Chunk
 
 	// Extract imports
 	if imports := findFirstChildOfType(node, "import_statement", "import_from_statement"); imports != nil {
@@ -251,8 +257,8 @@ func (c *Chunker) chunkPython(node *sitter.Node, content []byte, filePath, langu
 }
 
 // chunkJavaScript extracts chunks from JavaScript/TypeScript code
-func (c *Chunker) chunkJavaScript(node *sitter.Node, content []byte, filePath, language string) []Chunk {
-	var chunks []Chunk
+func (c *Chunker) chunkJavaScript(node *sitter.Node, content []byte, filePath, language string) []types.Chunk {
+	var chunks []types.Chunk
 
 	// Extract imports
 	if imports := findFirstChildOfType(node, "import_statement", "import"); imports != nil {
@@ -277,9 +283,9 @@ func (c *Chunker) chunkJavaScript(node *sitter.Node, content []byte, filePath, l
 }
 
 // chunkGeneric provides a generic chunking strategy for unsupported languages
-func (c *Chunker) chunkGeneric(node *sitter.Node, content []byte, filePath, language string) []Chunk {
+func (c *Chunker) chunkGeneric(node *sitter.Node, content []byte, filePath, language string) []types.Chunk {
 	// Just return the entire file as one chunk for unsupported languages
-	return []Chunk{{
+	return []types.Chunk{{
 		ID:        generateChunkID(filePath, 1, bytesCountToLines(content), 0, 0),
 		Content:   string(content),
 		FilePath:  filePath,
@@ -291,9 +297,9 @@ func (c *Chunker) chunkGeneric(node *sitter.Node, content []byte, filePath, lang
 }
 
 // Helper function to create a chunk from a node
-func createChunk(node *sitter.Node, content []byte, filePath, language, nodeType string) Chunk {
+func createChunk(node *sitter.Node, content []byte, filePath, language, nodeType string) types.Chunk {
 	startLine, endLine := GetNodePosition(node)
-	return Chunk{
+	return types.Chunk{
 		ID:        generateChunkID(filePath, startLine, endLine, node.StartByte(), node.EndByte()),
 		Content:   FormatNode(node, content),
 		FilePath:  filePath,

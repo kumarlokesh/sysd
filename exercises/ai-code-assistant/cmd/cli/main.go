@@ -1,15 +1,21 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/kumarlokesh/sysd/exercises/ai-code-assistant/internal/config"
+	"github.com/kumarlokesh/sysd/exercises/ai-code-assistant/internal/indexer"
+	"github.com/kumarlokesh/sysd/exercises/ai-code-assistant/internal/vectorstore"
 )
 
 func main() {
@@ -103,30 +109,78 @@ func handleConfigCommand(cfg *config.Config, args []string) {
 }
 
 func handleIndexCommand(cfg *config.Config, args []string) {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug, // Set to debug level for more detailed logs
+	}))
+
 	if len(args) == 0 {
+		logger.Error("No directory or file provided")
 		log.Fatal("Please provide a directory or file to index")
 	}
 
 	path := args[0]
-	absPath, err := filepath.Abs(path)
+	abspath, err := filepath.Abs(path)
 	if err != nil {
+		logger.Error("Failed to get absolute path", "path", path, "error", err)
 		log.Fatalf("Failed to get absolute path: %v", err)
 	}
 
-	info, err := os.Stat(absPath)
+	info, err := os.Stat(abspath)
 	if err != nil {
-		log.Fatalf("Path does not exist: %s", absPath)
+		logger.Error("Path does not exist", "path", abspath, "error", err)
+		log.Fatalf("Path does not exist: %s", abspath)
 	}
 
-	// TODO: Implement actual indexing
-	if info.IsDir() {
-		fmt.Printf("Indexing directory: %s\n", absPath)
-	} else {
-		fmt.Printf("Indexing file: %s\n", absPath)
+	logger.Info("Starting indexer", "path", abspath, "is_dir", info.IsDir())
+
+	chromaURL, err := url.Parse(cfg.ChromaDB.URL)
+	if err != nil {
+		log.Fatalf("Invalid ChromaDB URL: %v", err)
 	}
 
-	// TODO: Connect to database and store embeddings
-	fmt.Println("Indexing complete!")
+	host := chromaURL.Hostname()
+	port := 8000 // Default port
+	if chromaURL.Port() != "" {
+		port, err = strconv.Atoi(chromaURL.Port())
+		if err != nil {
+			log.Fatalf("Invalid port in ChromaDB URL: %v", err)
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
+
+	logger.Info("Connecting to ChromaDB", "host", host, "port", port)
+	chromaClient, err := vectorstore.NewChromaClient(host, port, logger)
+	if err != nil {
+		logger.Error("Failed to create ChromaDB client", "error", err)
+		os.Exit(1)
+	}
+
+	// Initialize storage
+	collectionName := "code_chunks"
+	logger.Info("Using collection", "name", collectionName)
+	storageImpl := vectorstore.NewChromaStore(chromaClient, collectionName, logger)
+
+	// Initialize indexer
+	idx := indexer.NewDefaultIndexer(
+		storageImpl,
+		indexer.WithLogger(logger),
+		indexer.WithWorkerCount(4),
+	)
+
+	// Start indexing
+	logger.Info("Starting indexing", "path", abspath, "is_dir", info.IsDir())
+	startTime := time.Now()
+
+	err = idx.IndexPath(ctx, abspath)
+	if err != nil {
+		logger.Error("Indexing failed", "error", err, "duration", time.Since(startTime).Round(time.Second))
+		os.Exit(1)
+	}
+
+	duration := time.Since(startTime).Round(time.Second)
+	logger.Info("Indexing completed successfully", "duration", duration)
 }
 
 func handleQueryCommand(cfg *config.Config, args []string) {

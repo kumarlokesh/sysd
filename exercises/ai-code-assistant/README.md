@@ -17,6 +17,8 @@ A proof-of-concept AI-powered code assistant with context awareness, built with 
   - [x] Basic code parsing with tree-sitter
   - [x] Document chunking
   - [x] Basic metadata handling
+  - [x] Advanced code parsing for multiple languages
+  - [x] Error handling and logging
 
 - **Vector Store**
   - [x] ChromaDB client implementation
@@ -27,16 +29,22 @@ A proof-of-concept AI-powered code assistant with context awareness, built with 
 ### In Progress
 
 - **Document Indexing**
-  - [ ] Advanced code parsing for multiple languages
   - [ ] Embedding generation
   - [ ] Incremental updates
+  - [ ] Performance optimizations for large codebases
+
+### In Development
+
+- **LLM Integration**
+  - [ ] Local LLM service (CodeLlama)
+  - [ ] Basic context management
 
 ### Planned
 
 - **LLM Integration**
-  - [ ] Local LLM service (CodeLlama)
-  - [ ] Context management
+  - [ ] Advanced context management
   - [ ] Code completion
+  - [ ] Code explanation and documentation generation
 
 - **Search & Navigation**
   - [ ] Semantic search across codebase
