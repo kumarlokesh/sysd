@@ -1,0 +1,35 @@
+# Server configuration
+server:
+  port: 8080
+  host: "localhost"
+  debug: true
+
+# ChromaDB configuration
+chromadb:
+  url: "http://localhost:8000"
+  api_key: ""
+
+# LLM configuration
+llm:
+  model: "codellama:7b"  # Ollama model name
+  temperature: 0.2
+  max_tokens: 2048
+  timeout: 300s
+  
+# Embedding configuration
+embeddings:
+  model: "sentence-transformers/all-mpnet-base-v2"
+  batch_size: 32
+  vector_dimension: 768
+  
+# Context configuration
+context:
+  max_files: 50
+  max_file_size: 1000000  # 1MB
+  chunk_size: 1000
+  chunk_overlap: 200
+  
+# Cache configuration
+cache:
+  enabled: true
+  ttl: 24h

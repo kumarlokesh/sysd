@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  chroma:
+    image: chromadb/chroma:0.4.24
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      # Run without authentication for testing
+      ANONYMOUS_ACCESS_ENABLED: "true"
+
+volumes:
+  chroma_data:
