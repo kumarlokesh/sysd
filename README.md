@@ -17,6 +17,12 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 - `.github/` - GitHub workflows and templates
 - `Makefile` - Common build and test commands
 
+## Exercises
+
+1. **[AI Code Assistant](exercises/ai-code-assistant/)** - A system design exercise for building an AI-powered coding assistant.
+2. **[Kafka Transactional Messaging](exercises/kafka-transactional-messaging/)** - Implementation of reliable message processing using Kafka transactions.
+3. **[Write-Ahead Log (WAL)](exercises/wal/)** - A low-level implementation of a write-ahead log for data durability.
+
 ## Getting Started
 
 1. Clone the repository
@@ -24,14 +30,3 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 3. Run `go test ./...` to run tests
 4. Check the exercise's README for specific instructions
 
-## Adding a New Exercise
-
-1. Create a new directory under `exercises/`
-2. Initialize a new Go module: `go mod init github.com/kumarlokesh/sysd/exercises/exercise-name`
-3. Follow the structure outlined above
-4. Add comprehensive tests
-5. Document your design in the README.md
-
-## Contributing
-
-Contributions are welcome! Please ensure your code is well-tested and documented.
