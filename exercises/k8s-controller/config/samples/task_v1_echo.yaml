@@ -1,0 +1,11 @@
+apiVersion: task.task.sysd.io/v1
+kind: Task
+metadata:
+  name: echo-task
+  namespace: task-test
+spec:
+  command: echo
+  args:
+    - "Hello, Kubernetes!"
+  # Optional: Uncomment to test scheduling
+  # schedule: "*/1 * * * *"  # Run every minute

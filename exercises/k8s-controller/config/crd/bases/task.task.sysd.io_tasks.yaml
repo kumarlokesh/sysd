@@ -1,0 +1,100 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  name: tasks.task.task.sysd.io
+spec:
+  group: task.task.sysd.io
+  names:
+    kind: Task
+    listKind: TaskList
+    plural: tasks
+    singular: task
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.command
+      name: Command
+      type: string
+    - jsonPath: .spec.schedule
+      name: Schedule
+      type: string
+    - jsonPath: .status.lastExecutionTime
+      name: LastExecuted
+      type: date
+    - jsonPath: .status.lastError
+      name: Status
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: Task is the Schema for the tasks API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TaskSpec defines the desired state of Task.
+            properties:
+              args:
+                description: Args are the arguments to pass to the command
+                items:
+                  type: string
+                type: array
+              command:
+                description: Command is the command to be executed
+                type: string
+              schedule:
+                description: Schedule is a cron expression for recurring tasks
+                pattern: ^(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every
+                  (\d+(ns|us|µs|ms|s|m|h))+)|((((\d+,)+\d+|(\d+(\/|-|\#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-\d{4})?)
+                  ?){5,7})$
+                type: string
+            required:
+            - command
+            type: object
+          status:
+            description: TaskStatus defines the observed state of Task.
+            properties:
+              executionCount:
+                description: ExecutionCount is the number of times the command has
+                  been executed
+                format: int32
+                type: integer
+              lastError:
+                description: LastError contains the error message if the last execution
+                  failed
+                type: string
+              lastExecutionOutput:
+                description: LastExecutionOutput contains the output of the last command
+                  execution
+                type: string
+              lastExecutionTime:
+                description: LastExecutionTime is the last time the command was executed
+                format: date-time
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -23,6 +23,7 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 2. **[Kafka Transactional Messaging](exercises/kafka-transactional-messaging/)** - Implementation of reliable message processing using Kafka transactions.
 3. **[Write-Ahead Log (WAL)](exercises/wal/)** - A low-level implementation of a write-ahead log for data durability.
 4. **[S3 Clone](exercises/s3-clone/)** - A minimal implementation of an Amazon S3-compatible object storage service with support for buckets and objects.
+5. **[Kubernetes Custom Controller](exercises/k8s-controller/)** - A custom Kubernetes controller that manages Task resources to execute commands within the cluster, with support for both one-time and scheduled tasks.
 
 ## Getting Started
 
