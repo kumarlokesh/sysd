@@ -22,6 +22,7 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 1. **[AI Code Assistant](exercises/ai-code-assistant/)** - A system design exercise for building an AI-powered coding assistant.
 2. **[Kafka Transactional Messaging](exercises/kafka-transactional-messaging/)** - Implementation of reliable message processing using Kafka transactions.
 3. **[Write-Ahead Log (WAL)](exercises/wal/)** - A low-level implementation of a write-ahead log for data durability.
+4. **[S3 Clone](exercises/s3-clone/)** - A minimal implementation of an Amazon S3-compatible object storage service with support for buckets and objects.
 
 ## Getting Started
 
@@ -29,4 +30,3 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 2. Navigate to an exercise directory
 3. Run `go test ./...` to run tests
 4. Check the exercise's README for specific instructions
-
