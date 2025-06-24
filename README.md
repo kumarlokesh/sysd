@@ -24,6 +24,7 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 3. **[Write-Ahead Log (WAL)](exercises/wal/)** - A low-level implementation of a write-ahead log for data durability.
 4. **[S3 Clone](exercises/s3-clone/)** - A minimal implementation of an Amazon S3-compatible object storage service with support for buckets and objects.
 5. **[Kubernetes Custom Controller](exercises/k8s-controller/)** - A custom Kubernetes controller that manages Task resources to execute commands within the cluster, with support for both one-time and scheduled tasks.
+6. **[SQL Parser](exercises/sql-parser/)** - A simplified SQL parser implementation in Go, focusing on understanding PostgreSQL's query processing internals.
 
 ## Getting Started
 
