@@ -72,14 +72,14 @@ curl http://localhost:8080/
 #### Upload an object
 
 ```bash
-echo "Hello, World!" > test.txt
+echo 'Hello, World!' > test.txt
 curl -X PUT -T test.txt http://localhost:8080/test-bucket/test.txt
 ```
 
 #### List objects in a bucket
 
 ```bash
-curl http://localhost:8080/test-bucket/
+curl http://localhost:8080/test-bucket
 ```
 
 #### Download an object
@@ -106,13 +106,11 @@ curl -X DELETE http://localhost:8080/test-bucket
 
 - Data is stored in memory
 - Data is lost when the server restarts
-- Good for testing and development
 
 ### Filesystem Storage
 
 - Data is persisted to disk
 - Configure with `--storage=filesystem --data-dir=/path/to/data`
-- Recommended for production use
 
 ## Configuration
 

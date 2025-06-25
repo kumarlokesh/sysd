@@ -113,7 +113,7 @@ curl -X DELETE http://localhost:8080/my-bucket
 Lists all objects in the specified bucket.
 
 ```http
-GET /{bucket}/
+GET /{bucket}
 ```
 
 **Path Parameters:**
