@@ -26,6 +26,7 @@ A collection of system design exercises implemented in Go. Each exercise is a se
 5. **[Kubernetes Custom Controller](exercises/k8s-controller/)** - A custom Kubernetes controller that manages Task resources to execute commands within the cluster, with support for both one-time and scheduled tasks.
 6. **[SQL Parser](exercises/sql-parser/)** - A simplified SQL parser implementation in Go, focusing on understanding PostgreSQL's query processing internals.
 7. **[Cassandra SSTable](exercises/cassandra-sstable/)** - An implementation of a simplified version of Cassandra's SSTable storage format with prefix compression using tries, including reader/writer implementation and range queries.
+8. **[HNSW Vector Search](exercises/hnsw-poc/)** - A high-performance implementation of the Hierarchical Navigable Small World (HNSW) algorithm for approximate nearest neighbor search in high-dimensional spaces.
 
 ## Getting Started
 
