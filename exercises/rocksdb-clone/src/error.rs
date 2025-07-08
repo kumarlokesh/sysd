@@ -1,4 +1,5 @@
-use std::{error, fmt, io, result};
+use bincode::error::{DecodeError, EncodeError};
+use std::{fmt, io, result};
 use thiserror::Error;
 
 /// A type alias for `Result<T, rocksdb_clone::Error>`.
@@ -11,13 +12,21 @@ pub enum Error {
     #[error("I/O error: {0}")]
     Io(#[from] io::Error),
 
-    /// Serialization/deserialization error
+    /// Serialization error
     #[error("Serialization error: {0}")]
     Serialization(String),
 
+    /// Deserialization error
+    #[error("Deserialization error: {0}")]
+    Deserialization(String),
+
     /// Key not found in storage
-    #[error("Key not found: {0}")]
-    KeyNotFound(String),
+    #[error("Key not found")]
+    KeyNotFound,
+
+    /// Database not found at the specified path
+    #[error("Database not found at: {0}")]
+    DatabaseNotFound(String),
 
     /// Invalid argument provided
     #[error("Invalid argument: {0}")]
@@ -41,6 +50,18 @@ impl Error {
     /// Creates a new serialization error
     pub fn serialization<T: fmt::Display>(msg: T) -> Self {
         Error::Serialization(msg.to_string())
+    }
+}
+
+impl From<EncodeError> for Error {
+    fn from(err: EncodeError) -> Self {
+        Error::Serialization(err.to_string())
+    }
+}
+
+impl From<DecodeError> for Error {
+    fn from(err: DecodeError) -> Self {
+        Error::Deserialization(err.to_string())
     }
 }
 

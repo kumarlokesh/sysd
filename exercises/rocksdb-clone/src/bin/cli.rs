@@ -29,30 +29,30 @@ enum Commands {
 
 fn main() -> Result<()> {
     env_logger::init();
-    
+
     let cli = Cli::parse();
-    
+
     let config = Config::new().path(cli.path);
-    
-    let mut db = DB::open(config)?;
-    
+
+    let mut db = DB::open(&config.path, config.create_if_missing)?;
+
     match cli.command {
         Commands::Get { key } => {
-            if let Some(value) = db.get(key.as_bytes())? {
+            if let Some(value) = db.get(key.as_bytes())?.map(|v| v.to_vec()) {
                 println!("{}", String::from_utf8_lossy(&value));
             } else {
                 println!("Key not found");
             }
         }
         Commands::Set { key, value } => {
-            db.put(key.into_bytes().into(), value.into_bytes().into())?;
+            db.put(key.as_bytes(), value.as_bytes().to_vec())?;
             println!("OK");
         }
         Commands::Delete { key } => {
-            db.delete(key.into_bytes().into())?;
+            db.delete(key.as_bytes())?;
             println!("OK");
         }
     }
-    
+
     Ok(())
 }

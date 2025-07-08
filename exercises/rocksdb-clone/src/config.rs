@@ -6,13 +6,13 @@ use std::path::PathBuf;
 pub struct Config {
     /// Path to the database directory
     pub path: PathBuf,
-    
+
     /// Maximum size of the MemTable in bytes before it becomes immutable
     pub memtable_size: usize,
-    
+
     /// Whether to sync writes to disk immediately
     pub sync: bool,
-    
+
     /// Whether to create the database if it doesn't exist
     pub create_if_missing: bool,
 }
