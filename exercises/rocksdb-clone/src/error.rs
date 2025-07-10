@@ -2,7 +2,7 @@ use bincode::error::{DecodeError, EncodeError};
 use std::{fmt, io, result};
 use thiserror::Error;
 
-/// A type alias for `Result<T, rocksdb_clone::Error>`.
+/// A type alias for `Result<T, Error>` where `Error` is this crate's error type.
 pub type Result<T> = result::Result<T, Error>;
 
 /// The error type for RocksDB Clone operations.

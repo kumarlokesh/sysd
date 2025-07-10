@@ -79,8 +79,8 @@ cargo run -- get mykey
 # Delete a key (marks it as deleted with a tombstone)
 cargo run -- delete mykey
 
-# Specify a custom data directory (default is './data')
-cargo run -- --data-dir ./mydata set mykey "my value"
+# Specify a custom data directory (default is 'rocksdb_data')
+cargo run -- --path ./mydata set mykey "my value"
 ```
 
 ### Persistence
