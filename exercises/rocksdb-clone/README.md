@@ -10,7 +10,7 @@ This project is an educational implementation of a key-value store inspired by R
 
 - [x] In-memory MemTable with get/put/delete operations
 - [x] Write-ahead log (WAL) for durability
-- [ ] SSTable storage format
+- [x] SSTable storage format
 - [ ] Compaction strategies
 - [ ] MVCC (Multi-Version Concurrency Control)
 - [ ] Column families
@@ -28,10 +28,13 @@ graph TD
         B --> C[MemTable]
         C --> D[BTreeMap]
         B --> E[Write-Ahead Log]
+        B --> F[SSTables]
+        C -->|Flush| F
         
         style C fill:#f9f,stroke:#333,stroke-width:2px
         style D fill:#bbf,stroke:#333,stroke-width:2px
         style E fill:#f9d,stroke:#333,stroke-width:2px
+        style F fill:#fdd,stroke:#333,stroke-width:2px
     end
     
     style A fill:#9f9,stroke:#333,stroke-width:2px
@@ -44,9 +47,10 @@ graph TD
 - **DB Interface**: Main database API (get/put/delete)
 - **MemTable**: In-memory key-value store with persistence
 - **Write-Ahead Log (WAL)**: Ensures durability by logging all write operations
+- **SSTables**: Immutable on-disk storage for key-value pairs, written when MemTable is full
 - **BTreeMap**: Underlying data structure for the MemTable
 
-> Note: The diagram shows the current implementation. Future components (SSTables, compaction, etc.) are not shown.
+> Note: The diagram shows the current implementation including SSTables. Future components (compaction, etc.) are not shown.
 
 ## Getting Started
 
@@ -95,6 +99,7 @@ The key-value store now includes persistence through a Write-Ahead Log (WAL). Al
   - `mod.rs`: Storage module definition and Store trait
   - `memtable.rs`: In-memory key-value store with persistence
   - `wal.rs`: Write-Ahead Log implementation
+  - `sstable.rs`: Sorted String Table implementation for persistent storage
 - `src/bin/cli.rs`: Command-line interface
 - `src/lib.rs`: Core database implementation
 
