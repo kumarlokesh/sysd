@@ -26,6 +26,11 @@ A collection of system design exercises implemented in Go and Rust. Each exercis
    - Column Families
    - Merge Operators
 
+2. **[SIMD-POC](exercises/simd-poc/)** - A proof-of-concept demonstrating SIMD (Single Instruction, Multiple Data) optimizations in Rust, including:
+   - Vectorized operations for performance-critical code paths
+   - Cross-platform SIMD using Rust's portable_simd
+   - Performance benchmarking and comparison with scalar implementations
+
 ## Getting Started
 
 ### For Go Exercises
